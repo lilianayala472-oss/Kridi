@@ -57,7 +57,7 @@ p{margin:0}
 .wm{display:block;width:max-content;direction:ltr;font-weight:600;font-size:22px;letter-spacing:.13em;line-height:1;color:var(--copper-lt)}
 .wm b{font-weight:800;color:var(--hero-ink)}
 .apptitle{font-size:13px;font-weight:500;color:var(--hero-muted);margin:6px 0 0;line-height:1.2}
-.tools{display:flex;gap:8px;flex-shrink:0}
+.tools{display:flex;gap:8px;flex-shrink:0;align-items:center}
 .mini{height:40px;min-width:40px;border-radius:12px;padding-inline:14px;font-size:14px;font-weight:600;white-space:nowrap;text-align:center;
   background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.2);color:var(--hero-ink);display:inline-flex;align-items:center;justify-content:center}
 .mini:active{background:rgba(255,255,255,.18)}
@@ -158,6 +158,10 @@ label span{opacity:.8}
 .chips.wrap{flex-wrap:wrap;max-height:150px;overflow-y:auto}
 .chips.wrap .chip{min-height:36px;padding:4px 14px;font-size:14px}
 .linkbtn{color:var(--accent);font-weight:600;font-size:14px;min-height:40px;padding-inline:2px;align-self:flex-start}
+[data-act][role=button]{cursor:pointer}
+.pen{width:16px;height:16px;margin-inline-start:8px;vertical-align:-2px;opacity:.6;flex:none}
+.cname .pen{width:20px;height:20px}
+.panel h2[data-act]:active,.figs div.tap:active{background:var(--accent-soft);border-radius:10px}
 .chip{border:1px solid var(--accent);color:var(--accent);border-radius:99px;padding:6px 16px;font-weight:600;font-size:15px;min-height:40px}
 .preview{font-size:15px;color:var(--muted);min-height:24px;margin-top:6px}
 .err{color:var(--debt);font-size:14px}
@@ -281,6 +285,10 @@ label span{opacity:.8}
       figIn: 'ليك عندو', figOut: 'عليك ليه', youOwe: 'عليك ليه', even: 'متعادل', tagOut: ' · عليك',
       bothLine: function(a, b){ return 'ليك ' + a + ' · عليك ' + b; },
       sumOut: function(m){ return 'وعليك للناس: ' + m; },
+      edit: 'تعديل', editClientTitle: 'تعديل الزبون', editEntry: 'تعديل هاد السطر', editEntryTitle: 'تعديل السطر',
+      totalLabel: 'الثمن الأصلي (DH)', toastEdited: 'تعدّل',
+      alreadyPaid: function(n){ return 'تخلّص حتى دابا: ' + n + ' DH'; },
+      totalTooLow: function(n){ return 'الثمن ما يقدرش يكون أقل من لي تخلّص (' + n + ' DH)'; },
       services: ['تصليح ماذربورد', 'تبديل شاشة', 'فورمات + برامج', 'تبديل باطري', 'تبديل SSD', 'بيع لابتوب', 'بيع هاتف', 'تنظيف وتبديل معجون']
     },
     en: {
@@ -330,6 +338,10 @@ label span{opacity:.8}
       figIn: 'Owed to you', figOut: 'You owe', youOwe: 'You owe them', even: 'Even', tagOut: ' \u00b7 you owe',
       bothLine: function(a, b){ return 'Owed ' + a + ' \u00b7 You owe ' + b; },
       sumOut: function(m){ return 'You owe others: ' + m; },
+      edit: 'Edit', editClientTitle: 'Edit client', editEntry: 'Edit this line', editEntryTitle: 'Edit line',
+      totalLabel: 'Original amount (DH)', toastEdited: 'Updated',
+      alreadyPaid: function(n){ return 'Already paid: ' + n + ' DH'; },
+      totalTooLow: function(n){ return 'The amount cannot be less than what was already paid (' + n + ' DH)'; },
       services: ['Motherboard repair', 'Screen replacement', 'Format + software', 'Battery replacement', 'SSD upgrade', 'Laptop sale', 'Phone sale', 'Cleaning + thermal paste']
     }
   };
@@ -347,6 +359,7 @@ label span{opacity:.8}
   };
   var fmtNum = function(n){ return NF[L].format(n).replace(/[  ]/g, ' '); };
   var money = function(n){ return '<span class="amt">' + fmtNum(n) + '<small>DH</small></span>'; };
+  var PEN = '<svg class="pen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>';
   var moneyDir = function(n, dir){ return '<span class="amt' + (dir === 'out' ? ' out' : '') + '">' + fmtNum(n) + '<small>DH</small></span>'; };
   var today = function(){ var d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
   var fdate = function(s){
@@ -450,7 +463,7 @@ label span{opacity:.8}
     var inT = inTot(c), outT = outTot(c), net = round2(inT - outT);
     var h0 = '<div class="hero-in"><div class="brandrow"><button class="back" data-act="back">' + t('back') + '</button>' +
       '<svg class="mark sm" aria-hidden="true"><use href="#mk"/></svg></div>' +
-      '<h1 class="cname">' + esc(c.name) + '</h1>' + (c.phone ? '<p class="phone"><bdi dir="ltr">' + esc(c.phone) + '</bdi></p>' : '');
+      '<h1 class="cname" data-act="editClient" role="button" tabindex="0">' + esc(c.name) + PEN + '</h1>' + (c.phone ? '<p class="phone" data-act="editClient"><bdi dir="ltr">' + esc(c.phone) + '</bdi></p>' : '');
     if (outT > 0) {
       h0 += '<div class="owe"><p class="lbl">' + t('diffLabel') + '</p><p class="big">' + money(Math.abs(net)) + '</p>' +
         '<p class="sub">' + (net > 0 ? t('diffTheyOwe') : net < 0 ? t('diffYouOwe') : t('diffEven')) + '</p></div>' +
@@ -522,13 +535,34 @@ label span{opacity:.8}
       '<button type="button" class="linkdanger" data-act="resetSvc">' + t('svcReset') + '</button>', 'fSvcList');
   }
 
+  function sheetEditClient(){
+    var c = findClient(current);
+    openSheet('<h2>' + t('editClientTitle') + '</h2><form data-kind="clientEdit" autocomplete="off">' +
+      '<label for="fName">' + t('clientName') + '</label><input id="fName" required value="' + esc(c.name) + '">' +
+      '<label for="fPhone">' + t('phone') + ' <span>' + t('optional') + '</span></label><input id="fPhone" inputmode="tel" value="' + esc(c.phone || '') + '">' +
+      '<div class="actions"><button type="button" class="ghost" data-act="closeSheet">' + t('cancel') + '</button><button class="primary">' + t('save') + '</button></div></form>', 'fName');
+  }
+
+  function sheetEditEntry(){
+    var c = findClient(current), e = c && c.entries.find(function(x){ return x.id === ctx.eid; });
+    if (!e) return;
+    var out = e.dir === 'out', paid = round2(e.total - e.remaining);
+    openSheet('<h2>' + t('editEntryTitle') + '</h2><p class="sub">' + esc(c.name) + '</p><form data-kind="entryEdit" autocomplete="off">' +
+      '<label for="fSvc">' + t(out ? 'svcOut' : 'service') + '</label><input id="fSvc" required value="' + esc(e.service) + '">' +
+      '<label for="fTot">' + t('totalLabel') + '</label><input id="fTot" inputmode="decimal" required value="' + esc(String(e.total)) + '">' +
+      (paid > 0 ? '<p class="sub">' + t('alreadyPaid', fmtNum(paid)) + '</p>' : '') +
+      '<label for="fDate">' + t('date') + '</label><input id="fDate" type="date" value="' + esc(e.date || today()) + '" required>' +
+      '<p class="err" id="fErr" hidden></p>' +
+      '<div class="actions"><button type="button" class="ghost" data-act="cancelEdit">' + t('cancel') + '</button><button class="primary">' + t('save') + '</button></div></form>', 'fSvc');
+  }
+
   function sheetPay(eid){
     var c = findClient(current); var e = c && c.entries.find(function(x){ return x.id === eid; });
     if (!e) return;
     ctx = {eid: eid};
     var settled = e.remaining <= 0;
-    var h = '<h2>' + esc(e.service) + '</h2><p class="sub">' + esc(c.name) + ' · ' + fdate(e.date) + '</p>' +
-      '<dl class="figs" style="margin-inline:0"><div><dt>' + t('original') + '</dt><dd>' + money(e.total) + '</dd></div><div class="rem"><dt>' + t('remaining') + '</dt><dd>' + (settled ? '<span class="pill ok">' + t('settled') + '</span>' : money(e.remaining)) + '</dd></div></dl>';
+    var h = '<h2 class="tap" data-act="editEntry" role="button" tabindex="0">' + esc(e.service) + PEN + '</h2><p class="sub">' + esc(c.name) + ' · ' + fdate(e.date) + '</p>' +
+      '<dl class="figs" style="margin-inline:0"><div class="tap" data-act="editEntry" role="button" tabindex="0"><dt>' + t('original') + PEN + '</dt><dd>' + money(e.total) + '</dd></div><div class="rem tap" data-act="editEntry" role="button" tabindex="0"><dt>' + t('remaining') + PEN + '</dt><dd>' + (settled ? '<span class="pill ok">' + t('settled') + '</span>' : money(e.remaining)) + '</dd></div></dl>';
     if (!settled) {
       h += '<form data-kind="pay" autocomplete="off"><label for="fPay">' + t(e.dir === 'out' ? 'paidNowOut' : 'paidNow') + '</label>' +
         '<input id="fPay" inputmode="decimal" placeholder="0">' +
@@ -636,6 +670,9 @@ label span{opacity:.8}
     else if (act === 'addClient') sheetClient();
     else if (act === 'addEntry') sheetEntry();
     else if (act === 'addOut') sheetEntry({dir: 'out'});
+    else if (act === 'editClient') sheetEditClient();
+    else if (act === 'editEntry') sheetEditEntry();
+    else if (act === 'cancelEdit') sheetPay(ctx.eid);
     else if (act === 'pay') sheetPay(b.dataset.eid);
     else if (act === 'backup') sheetBackup();
     else if (act === 'shareBackup') shareBackup();
@@ -675,6 +712,22 @@ label span{opacity:.8}
       var id = genId();
       clients.push({id: id, name: name, phone: $('#fPhone').value.trim(), createdAt: Date.now(), entries: []});
       lsSave(); closeSheet(); go(id);
+    } else if (kind === 'clientEdit') {
+      var cn = $('#fName').value.trim();
+      if (!cn) return;
+      var cc2 = findClient(current);
+      cc2.name = cn; cc2.phone = $('#fPhone').value.trim();
+      lsSave(); closeSheet(); render(); toast(t('toastEdited'));
+    } else if (kind === 'entryEdit') {
+      var ce = findClient(current), ee = ce.entries.find(function(x){ return x.id === ctx.eid; });
+      var nsvc = $('#fSvc').value.trim(), ntot = parseAmt($('#fTot').value), ndate = $('#fDate').value || ee.date;
+      var eer = $('#fErr');
+      if (!nsvc) return;
+      if (isNaN(ntot) || ntot <= 0) { eer.textContent = t('amtErr'); eer.hidden = false; return; }
+      var paidSoFar = round2(ee.total - ee.remaining);
+      if (ntot < paidSoFar - 0.001) { eer.textContent = t('totalTooLow', fmtNum(paidSoFar)); eer.hidden = false; return; }
+      ee.service = nsvc; ee.total = round2(ntot); ee.remaining = round2(ntot - paidSoFar); ee.date = ndate;
+      lsSave(); closeSheet(); render(); toast(t('toastEdited'));
     } else if (kind === 'svc') {
       var seen = {}, list = $('#fSvcList').value.split('\n').map(function(s){ return s.trim(); }).filter(function(s){
         if (!s || seen[s]) return false; seen[s] = 1; return true;
@@ -702,7 +755,10 @@ label span{opacity:.8}
   });
 
   $('#q').addEventListener('input', renderHome);
-  document.addEventListener('keydown', function(ev){ if (ev.key === 'Escape' && !$('#sheet').hidden) closeSheet(); });
+  document.addEventListener('keydown', function(ev){
+    if (ev.key === 'Escape' && !$('#sheet').hidden) closeSheet();
+    else if ((ev.key === 'Enter' || ev.key === ' ') && ev.target.matches && ev.target.matches('[role=button][data-act]')) { ev.preventDefault(); ev.target.click(); }
+  });
 
   /* ---------- start ---------- */
   storageOK = testStorage();
