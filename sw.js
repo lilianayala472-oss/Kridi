@@ -1,5 +1,5 @@
 /* Offline cache: serves the app from cache, refreshes it in the background when online. */
-var CACHE = 'kridi-v5';
+var CACHE = 'kridi-v6';
 var FILES = ['./', 'index.html', 'manifest.webmanifest', 'icon-180.png', 'icon-512.png'];
 
 self.addEventListener('install', function(e){

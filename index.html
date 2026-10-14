@@ -77,8 +77,13 @@ p{margin:0}
 .owe{margin-top:16px;display:flex;flex-direction:column;gap:4px;align-items:flex-start}
 .back{display:inline-flex;align-items:center;min-height:44px;color:var(--hero-ink);font-weight:600;padding-inline-end:12px;margin-inline-start:-4px}
 
+.hfigs{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
+.hfigs div{background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.16);border-radius:14px;padding:10px 12px;min-width:0}
+.hfigs .lbl{display:block;color:var(--hero-muted);font-size:13px}
+.hfigs .amt{font-size:20px}
 .amt{direction:ltr;unicode-bidi:isolate;display:inline-block;font-weight:700;color:var(--debt);font-variant-numeric:tabular-nums;white-space:nowrap}
 .amt small{font-size:.62em;font-weight:600;margin-inline-start:.28em;opacity:.9}
+.amt.out{color:var(--accent)}
 
 main{max-width:560px;margin-inline:auto;padding-block:18px 112px;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
@@ -106,6 +111,8 @@ main{max-width:560px;margin-inline:auto;padding-block:18px 112px;
 
 .bottombar{position:fixed;inset-inline:0;bottom:0;padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));background:linear-gradient(to top,var(--bg) 62%,transparent)}
 .bottombar>button{display:block;width:100%;max-width:560px;margin-inline:auto}
+.bottombar.bb2{display:grid;grid-template-columns:3fr 2fr;gap:10px;padding-inline:max(16px,calc((100% - 560px)/2))}
+.bottombar.bb2>button{max-width:none;margin-inline:0}
 .primary,.ghost,.danger{height:52px;border-radius:14px;font-weight:600;font-size:17px;padding-inline:20px;text-align:center}
 .primary{background:var(--accent);color:var(--accent-ink)}
 .primary:active{filter:brightness(.92)}
@@ -210,7 +217,7 @@ label span{opacity:.8}
 <div id="client" hidden>
   <header class="hero" id="clientHero"></header>
   <main><div id="clientBody"></div></main>
-  <div class="bottombar"><button class="primary" data-act="addEntry" data-i18n="addEntryBtn">+ كريدي جديد</button></div>
+  <div class="bottombar bb2"><button class="primary" data-act="addEntry" data-i18n="addEntryBtn">+ كريدي جديد</button><button class="ghost" data-act="addOut" data-i18n="addOutBtn">+ عليا ليه</button></div>
 </div>
 
 <div id="sheet" hidden>
@@ -268,6 +275,12 @@ label span{opacity:.8}
       shareTitle: 'نسخة الكريدي',
       editSvc: 'تعديل الخدمات', svcLabel: 'لائحة الخدمات (خدمة وحدة فكل سطر)', svcSave: 'حفظ اللائحة',
       svcReset: 'رجّع اللائحة الأصلية', toastSvcSaved: 'تحفظات اللائحة', toastSvcReset: 'رجعات اللائحة الأصلية',
+      addOutBtn: '+ عليا ليه', newOwe: 'عليا ليه', svcOut: 'على شنو؟', servicePhOut: 'مثلا: قطعة، سلفة',
+      amountOwe: 'المبلغ لي خاصني نعطيه (DH)', paidNowOut: 'المبلغ لي عطيتو دابا (DH)', secOut: 'عليك ليه',
+      diffLabel: 'الفرق بينكم', diffTheyOwe: 'هو خاصو يعطيك', diffYouOwe: 'خاصك تعطيه', diffEven: 'الحساب بينكم متعادل',
+      figIn: 'ليك عندو', figOut: 'عليك ليه', youOwe: 'عليك ليه', even: 'متعادل', tagOut: ' · عليك',
+      bothLine: function(a, b){ return 'ليك ' + a + ' · عليك ' + b; },
+      sumOut: function(m){ return 'وعليك للناس: ' + m; },
       services: ['تصليح ماذربورد', 'تبديل شاشة', 'فورمات + برامج', 'تبديل باطري', 'تبديل SSD', 'بيع لابتوب', 'بيع هاتف', 'تنظيف وتبديل معجون']
     },
     en: {
@@ -311,6 +324,12 @@ label span{opacity:.8}
       shareTitle: 'Credit book backup',
       editSvc: 'Edit services', svcLabel: 'Service list (one per line)', svcSave: 'Save list',
       svcReset: 'Restore default list', toastSvcSaved: 'List saved', toastSvcReset: 'Default list restored',
+      addOutBtn: '+ I owe them', newOwe: 'I owe them', svcOut: 'What for?', servicePhOut: 'e.g. a part, an advance',
+      amountOwe: 'Amount I owe (DH)', paidNowOut: 'Amount I paid now (DH)', secOut: 'You owe them',
+      diffLabel: 'Difference between you', diffTheyOwe: 'They owe you', diffYouOwe: 'You owe them', diffEven: 'You are even',
+      figIn: 'Owed to you', figOut: 'You owe', youOwe: 'You owe them', even: 'Even', tagOut: ' \u00b7 you owe',
+      bothLine: function(a, b){ return 'Owed ' + a + ' \u00b7 You owe ' + b; },
+      sumOut: function(m){ return 'You owe others: ' + m; },
       services: ['Motherboard repair', 'Screen replacement', 'Format + software', 'Battery replacement', 'SSD upgrade', 'Laptop sale', 'Phone sale', 'Cleaning + thermal paste']
     }
   };
@@ -328,6 +347,7 @@ label span{opacity:.8}
   };
   var fmtNum = function(n){ return NF[L].format(n).replace(/[  ]/g, ' '); };
   var money = function(n){ return '<span class="amt">' + fmtNum(n) + '<small>DH</small></span>'; };
+  var moneyDir = function(n, dir){ return '<span class="amt' + (dir === 'out' ? ' out' : '') + '">' + fmtNum(n) + '<small>DH</small></span>'; };
   var today = function(){ var d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
   var fdate = function(s){
     if (!s) return '';
@@ -369,15 +389,19 @@ label span{opacity:.8}
     toastTimer = setTimeout(function(){ el.classList.remove('on'); }, 2800);
   }
 
-  var owed = function(c){ return round2((c.entries || []).reduce(function(s, e){ return s + Math.max(0, e.remaining); }, 0)); };
+  var sumDir = function(c, dir){ return round2((c.entries || []).reduce(function(s, e){ return s + (e.dir === dir ? Math.max(0, e.remaining) : 0); }, 0)); };
+  var inTot = function(c){ return sumDir(c, 'in'); };
+  var outTot = function(c){ return sumDir(c, 'out'); };
   var findClient = function(id){ return clients.find(function(c){ return c.id === id; }); };
 
   /* ---------- render ---------- */
   function renderHome(){
-    var total = round2(clients.reduce(function(s, c){ return s + owed(c); }, 0));
-    var debtors = clients.filter(function(c){ return owed(c) > 0; }).length;
+    var total = round2(clients.reduce(function(s, c){ return s + inTot(c); }, 0));
+    var totalOut = round2(clients.reduce(function(s, c){ return s + outTot(c); }, 0));
+    var debtors = clients.filter(function(c){ return inTot(c) > 0; }).length;
     $('#summary').innerHTML = '<p class="lbl">' + t('sumLabel') + '</p><p class="big">' + money(total) + '</p><p class="sub">' +
-      (debtors === 0 ? t('sumNone') : debtors === 1 ? t('sumOne') : t('sumMany', debtors)) + '</p>';
+      (debtors === 0 ? t('sumNone') : debtors === 1 ? t('sumOne') : t('sumMany', debtors)) + '</p>' +
+      (totalOut > 0 ? '<p class="sub">' + t('sumOut', money(totalOut)) + '</p>' : '');
 
     var n = '';
     var bk = Number(lsGet(LS_BK) || 0);
@@ -387,17 +411,21 @@ label span{opacity:.8}
 
     var q = $('#q').value.trim().toLowerCase();
     var list = clients.filter(function(c){ return !q || c.name.toLowerCase().indexOf(q) > -1 || (c.phone || '').indexOf(q) > -1; });
-    list.sort(function(a, b){ return owed(b) - owed(a) || a.name.localeCompare(b.name, L); });
+    list.sort(function(a, b){ return round2(inTot(b) - outTot(b)) - round2(inTot(a) - outTot(a)) || a.name.localeCompare(b.name, L); });
     var el = $('#clientList');
     if (!clients.length) { el.innerHTML = '<li class="empty"><b>' + t('emptyNoClientsT') + '</b>' + t('emptyNoClientsD') + '</li>'; return; }
     if (!list.length) { el.innerHTML = '<li class="empty"><b>' + t('emptyNoMatchT') + '</b>' + t('emptyNoMatchD') + '</li>'; return; }
     el.innerHTML = list.map(function(c){
-      var tot = owed(c), open = c.entries.filter(function(e){ return e.remaining > 0; }).length;
+      var inT = inTot(c), outT = outTot(c), net = round2(inT - outT);
+      var openIn = c.entries.filter(function(e){ return e.dir === 'in' && e.remaining > 0; }).length;
       var ch = (c.name.trim()[0] || '?').toUpperCase();
+      var sub = inT > 0 && outT > 0 ? t('bothLine', fmtNum(inT), fmtNum(outT)) : inT > 0 ? t('openCount', openIn) : outT > 0 ? t('youOwe') : t('settled');
+      var amount = net > 0 ? money(net) : net < 0 ? moneyDir(-net, 'out')
+        : '<span class="pill ok">' + ((inT > 0 || outT > 0) ? t('even') : t('settled')) + '</span>';
       return '<li><button class="row" data-act="open" data-id="' + esc(c.id) + '">' +
         '<span class="av">' + esc(ch) + '</span>' +
-        '<span class="who"><b>' + esc(c.name) + '</b><small>' + (open ? t('openCount', open) : t('settled')) + '</small></span>' +
-        (tot > 0 ? money(tot) : '<span class="pill ok">' + t('settled') + '</span>') + '</button></li>';
+        '<span class="who"><b>' + esc(c.name) + '</b><small>' + sub + '</small></span>' +
+        amount + '</button></li>';
     }).join('');
   }
 
@@ -407,8 +435,8 @@ label span{opacity:.8}
     var pct = e.total > 0 ? Math.min(100, Math.round(paid / e.total * 100)) : 0;
     var partial = paid > 0 && !settled;
     return '<li><button class="entry' + (settled ? ' settled' : '') + '" data-act="pay" data-eid="' + esc(e.id) + '">' +
-      '<span class="e-main"><b>' + esc(e.service) + '</b><small>' + fdate(e.date) + (partial ? t('paidOf', fmtNum(paid), fmtNum(e.total)) : '') + '</small></span>' +
-      '<span class="e-side">' + (settled ? '<span class="pill ok">' + t('settled') + '</span>' : money(e.remaining) + '<span class="pay-hint">' + t('payHint') + '</span>') + '</span>' +
+      '<span class="e-main"><b>' + esc(e.service) + '</b><small>' + fdate(e.date) + (partial ? t('paidOf', fmtNum(paid), fmtNum(e.total)) : '') + (e.dir === 'out' ? t('tagOut') : '') + '</small></span>' +
+      '<span class="e-side">' + (settled ? '<span class="pill ok">' + t('settled') + '</span>' : moneyDir(e.remaining, e.dir) + '<span class="pay-hint">' + t('payHint') + '</span>') + '</span>' +
       (partial ? '<span class="bar"><i style="width:' + pct + '%"></i></span>' : '') + '</button></li>';
   }
 
@@ -416,18 +444,31 @@ label span{opacity:.8}
     var c = findClient(current);
     if (!c) return;
     var byDate = function(a, b){ return (b.date || '').localeCompare(a.date || ''); };
-    var open = c.entries.filter(function(e){ return e.remaining > 0; }).sort(byDate);
+    var openIn = c.entries.filter(function(e){ return e.dir === 'in' && e.remaining > 0; }).sort(byDate);
+    var openOut = c.entries.filter(function(e){ return e.dir === 'out' && e.remaining > 0; }).sort(byDate);
     var done = c.entries.filter(function(e){ return e.remaining <= 0; }).sort(byDate);
-    var tot = owed(c);
-    $('#clientHero').innerHTML = '<div class="hero-in"><div class="brandrow"><button class="back" data-act="back">' + t('back') + '</button>' +
+    var inT = inTot(c), outT = outTot(c), net = round2(inT - outT);
+    var h0 = '<div class="hero-in"><div class="brandrow"><button class="back" data-act="back">' + t('back') + '</button>' +
       '<svg class="mark sm" aria-hidden="true"><use href="#mk"/></svg></div>' +
-      '<h1 class="cname">' + esc(c.name) + '</h1>' + (c.phone ? '<p class="phone"><bdi dir="ltr">' + esc(c.phone) + '</bdi></p>' : '') +
-      '<div class="owe"><p class="lbl">' + t('owes') + '</p>' + (tot > 0 ? '<p class="big">' + money(tot) + '</p>' : '<p><span class="pill ok">' + t('owesZero') + '</span></p>') + '</div></div>';
+      '<h1 class="cname">' + esc(c.name) + '</h1>' + (c.phone ? '<p class="phone"><bdi dir="ltr">' + esc(c.phone) + '</bdi></p>' : '');
+    if (outT > 0) {
+      h0 += '<div class="owe"><p class="lbl">' + t('diffLabel') + '</p><p class="big">' + money(Math.abs(net)) + '</p>' +
+        '<p class="sub">' + (net > 0 ? t('diffTheyOwe') : net < 0 ? t('diffYouOwe') : t('diffEven')) + '</p></div>' +
+        '<div class="hfigs"><div><span class="lbl">' + t('figIn') + '</span>' + money(inT) + '</div>' +
+        '<div><span class="lbl">' + t('figOut') + '</span>' + money(outT) + '</div></div>';
+    } else {
+      h0 += '<div class="owe"><p class="lbl">' + t('owes') + '</p>' + (inT > 0 ? '<p class="big">' + money(inT) + '</p>' : '<p><span class="pill ok">' + t('owesZero') + '</span></p>') + '</div>';
+    }
+    $('#clientHero').innerHTML = h0 + '</div>';
 
-    var h = '<h2 class="sec">' + t('secCredit') + '</h2>';
-    h += open.length ? '<ul class="list" style="margin-top:0">' + open.map(function(e){ return entryCard(c, e); }).join('') + '</ul>'
-      : '<div class="list" style="margin-top:0"><p class="empty"><b>' + t('noOpenT') + '</b>' + t('noOpenD') + '</p></div>';
-    if (done.length) h += '<h2 class="sec">' + t('secSettled') + '</h2><ul class="list" style="margin-top:0">' + done.map(function(e){ return entryCard(c, e); }).join('') + '</ul>';
+    var list = function(arr){ return '<ul class="list" style="margin-top:0">' + arr.map(function(e){ return entryCard(c, e); }).join('') + '</ul>'; };
+    var h = '';
+    if (openIn.length || !openOut.length) {
+      h += '<h2 class="sec">' + t('secCredit') + '</h2>';
+      h += openIn.length ? list(openIn) : '<div class="list" style="margin-top:0"><p class="empty"><b>' + t('noOpenT') + '</b>' + t('noOpenD') + '</p></div>';
+    }
+    if (openOut.length) h += '<h2 class="sec">' + t('secOut') + '</h2>' + list(openOut);
+    if (done.length) h += '<h2 class="sec">' + t('secSettled') + '</h2>' + list(done);
     h += '<button class="linkdanger" data-act="delClient">' + t('delClient') + '</button>';
     $('#clientBody').innerHTML = h;
   }
@@ -461,13 +502,13 @@ label span{opacity:.8}
 
   function sheetEntry(draft){
     draft = draft || {};
+    var out = draft.dir === 'out'; ctx.entryDir = out ? 'out' : 'in';
     var c = findClient(current);
     var chips = getServices().map(function(s){ return '<button type="button" class="chip" data-act="pickSvc" data-v="' + esc(s) + '">' + esc(s) + '</button>'; }).join('');
-    openSheet('<h2>' + t('newCredit') + '</h2><p class="sub">' + esc(c.name) + '</p><form data-kind="entry" autocomplete="off">' +
-      '<label for="fSvc">' + t('service') + '</label><input id="fSvc" required placeholder="' + esc(t('servicePh')) + '" value="' + esc(draft.svc || '') + '">' +
-      '<div class="chips wrap">' + chips + '</div>' +
-      '<button type="button" class="linkbtn" data-act="editSvc">' + t('editSvc') + '</button>' +
-      '<label for="fAmt">' + t('amountLeft') + '</label><input id="fAmt" inputmode="decimal" required placeholder="0" value="' + esc(draft.amt || '') + '">' +
+    openSheet('<h2>' + t(out ? 'newOwe' : 'newCredit') + '</h2><p class="sub">' + esc(c.name) + '</p><form data-kind="entry" autocomplete="off">' +
+      '<label for="fSvc">' + t(out ? 'svcOut' : 'service') + '</label><input id="fSvc" required placeholder="' + esc(t(out ? 'servicePhOut' : 'servicePh')) + '" value="' + esc(draft.svc || '') + '">' +
+      (out ? '' : '<div class="chips wrap">' + chips + '</div><button type="button" class="linkbtn" data-act="editSvc">' + t('editSvc') + '</button>') +
+      '<label for="fAmt">' + t(out ? 'amountOwe' : 'amountLeft') + '</label><input id="fAmt" inputmode="decimal" required placeholder="0" value="' + esc(draft.amt || '') + '">' +
       '<label for="fDate">' + t('date') + '</label><input id="fDate" type="date" value="' + esc(draft.date || today()) + '" required>' +
       '<p class="err" id="fErr" hidden></p>' +
       '<div class="actions"><button type="button" class="ghost" data-act="closeSheet">' + t('cancel') + '</button><button class="primary">' + t('save') + '</button></div></form>', 'fSvc');
@@ -489,7 +530,7 @@ label span{opacity:.8}
     var h = '<h2>' + esc(e.service) + '</h2><p class="sub">' + esc(c.name) + ' · ' + fdate(e.date) + '</p>' +
       '<dl class="figs" style="margin-inline:0"><div><dt>' + t('original') + '</dt><dd>' + money(e.total) + '</dd></div><div class="rem"><dt>' + t('remaining') + '</dt><dd>' + (settled ? '<span class="pill ok">' + t('settled') + '</span>' : money(e.remaining)) + '</dd></div></dl>';
     if (!settled) {
-      h += '<form data-kind="pay" autocomplete="off"><label for="fPay">' + t('paidNow') + '</label>' +
+      h += '<form data-kind="pay" autocomplete="off"><label for="fPay">' + t(e.dir === 'out' ? 'paidNowOut' : 'paidNow') + '</label>' +
         '<input id="fPay" inputmode="decimal" placeholder="0">' +
         '<div class="chips"><button type="button" class="chip" data-act="fillAll">' + t('payAll') + '</button></div>' +
         '<p class="preview" id="payPreview"></p><p class="err" id="payErr" hidden></p>' +
@@ -555,6 +596,7 @@ label span{opacity:.8}
     c.entries = (c.entries || []).map(function(e){
       e.total = Number(e.total) || 0; e.remaining = Number(e.remaining) || 0;
       e.payments = Array.isArray(e.payments) ? e.payments : [];
+      e.dir = e.dir === 'out' ? 'out' : 'in';
       return e;
     });
     return c;
@@ -593,6 +635,7 @@ label span{opacity:.8}
     }
     else if (act === 'addClient') sheetClient();
     else if (act === 'addEntry') sheetEntry();
+    else if (act === 'addOut') sheetEntry({dir: 'out'});
     else if (act === 'pay') sheetPay(b.dataset.eid);
     else if (act === 'backup') sheetBackup();
     else if (act === 'shareBackup') shareBackup();
@@ -600,7 +643,7 @@ label span{opacity:.8}
     else if (act === 'closeSheet') closeSheet();
     else if (act === 'pickSvc') { $('#fSvc').value = b.dataset.v; $('#fAmt').focus(); }
     else if (act === 'editSvc') {
-      ctx.draft = {svc: $('#fSvc').value, amt: $('#fAmt').value, date: $('#fDate').value};
+      ctx.draft = {svc: $('#fSvc').value, amt: $('#fAmt').value, date: $('#fDate').value, dir: ctx.entryDir};
       sheetServices();
     }
     else if (act === 'cancelSvc') sheetEntry(ctx.draft);
@@ -644,7 +687,7 @@ label span{opacity:.8}
       if (!svc) return;
       if (isNaN(amt) || amt <= 0) { er.textContent = t('amtErr'); er.hidden = false; return; }
       var cl = findClient(current);
-      cl.entries.unshift({id: genId(), service: svc, total: round2(amt), remaining: round2(amt), date: date, payments: []});
+      cl.entries.unshift({id: genId(), service: svc, total: round2(amt), remaining: round2(amt), date: date, payments: [], dir: ctx.entryDir === 'out' ? 'out' : 'in'});
       lsSave(); closeSheet(); render(); toast(t('toastSaved'));
     } else if (kind === 'pay') {
       var cc = findClient(current), e = cc.entries.find(function(x){ return x.id === ctx.eid; });
